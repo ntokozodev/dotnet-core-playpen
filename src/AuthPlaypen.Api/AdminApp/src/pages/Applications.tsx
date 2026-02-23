@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import { For, Show } from "solid-js";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useApplications } from "@/queries/applicationQueries";
 
 function getErrorMessage(error: unknown): string {
@@ -19,6 +20,9 @@ export function Applications() {
           + Create
         </A>
       </div>
+      <Show when={query.isPending}>
+        <LoadingSpinner label="Loading applications..." />
+      </Show>
       <Show when={query.isError}>
         <div class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           Could not fetch applications. {getErrorMessage(query.error)}

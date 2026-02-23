@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import { For, Show } from "solid-js";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useScopes } from "@/queries/scopeQueries";
 
 function getErrorMessage(error: unknown): string {
@@ -19,6 +20,9 @@ export function Scopes() {
           + Create
         </A>
       </div>
+      <Show when={query.isPending}>
+        <LoadingSpinner label="Loading scopes..." />
+      </Show>
       <Show when={query.isError}>
         <div class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           Could not fetch scopes. {getErrorMessage(query.error)}
