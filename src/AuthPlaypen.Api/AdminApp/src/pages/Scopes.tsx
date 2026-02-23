@@ -1,7 +1,11 @@
 import { A } from "@solidjs/router";
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useScopes } from "@/queries/scopeQueries";
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unable to load scopes. Please try again.";
+}
 
 export function Scopes() {
   const query = useScopes();
@@ -15,6 +19,11 @@ export function Scopes() {
           + Create
         </A>
       </div>
+      <Show when={query.isError}>
+        <div class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          Could not fetch scopes. {getErrorMessage(query.error)}
+        </div>
+      </Show>
       <For each={query.data ?? []}>
         {(scope) => (
           <div class="flex items-start justify-between rounded border border-slate-200 bg-white p-4">
