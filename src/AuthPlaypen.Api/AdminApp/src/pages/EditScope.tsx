@@ -1,21 +1,25 @@
-import { useParams } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
 import { createEffect, createSignal } from "solid-js";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { DeleteConfirmationModal } from "@/components/DeleteConfirmationModal";
 import { MultiSelect } from "@/components/MultiSelect";
 import { useApplications } from "@/queries/applicationQueries";
-import { useScopes, useUpdateScope } from "@/queries/scopeQueries";
+import { useDeleteScope, useScopes, useUpdateScope } from "@/queries/scopeQueries";
 import { mapSelectionToIds } from "@/utils/selection";
 
 export function EditScope() {
   const params = useParams();
+  const navigate = useNavigate();
   const scopes = useScopes();
   const apps = useApplications();
   const update = useUpdateScope();
+  const remove = useDeleteScope();
 
   const [displayName, setDisplayName] = createSignal("");
   const [scopeName, setScopeName] = createSignal("");
   const [description, setDescription] = createSignal("");
   const [selectedAppIds, setSelectedAppIds] = createSignal<string[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = createSignal(false);
 
   const selectedScope = () => scopes.data?.find((s) => s.id === params.id);
 
@@ -68,6 +72,24 @@ export function EditScope() {
       >
         Save
       </button>
+      <button class="rounded bg-red-700 px-3 py-2 text-white" type="button" onClick={() => setShowDeleteModal(true)}>
+        Delete Scope
+      </button>
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal()}
+        title="Delete scope"
+        description="This will permanently remove the scope and clear it from linked applications."
+        isDeleting={remove.isPending}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          const scope = selectedScope();
+          if (!scope) return;
+          remove.mutate(scope.id, {
+            onSuccess: () => navigate("/scopes"),
+          });
+          setShowDeleteModal(false);
+        }}
+      />
     </div>
   );
 }

@@ -173,10 +173,18 @@ public class ApplicationService(
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        var application = await dbContext.Applications.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+        var application = await dbContext.Applications
+            .Include(a => a.ApplicationScopes)
+            .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
         if (application is null)
         {
             return false;
+        }
+
+        if (application.ApplicationScopes.Count > 0)
+        {
+            dbContext.ApplicationScopes.RemoveRange(application.ApplicationScopes);
         }
 
         dbContext.Applications.Remove(application);

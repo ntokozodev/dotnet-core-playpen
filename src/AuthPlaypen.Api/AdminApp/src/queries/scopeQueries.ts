@@ -34,3 +34,11 @@ export function useUpdateScope() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: scopeKeys.all }),
   }));
 }
+
+export function useDeleteScope() {
+  const queryClient = useQueryClient();
+  return useMutation(() => ({
+    mutationFn: scopeService.delete,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: scopeKeys.all }),
+  }));
+}

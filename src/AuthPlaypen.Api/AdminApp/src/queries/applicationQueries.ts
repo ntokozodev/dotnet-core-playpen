@@ -35,3 +35,11 @@ export function useUpdateApplication() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: applicationKeys.all }),
   }));
 }
+
+export function useDeleteApplication() {
+  const queryClient = useQueryClient();
+  return useMutation(() => ({
+    mutationFn: applicationService.delete,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: applicationKeys.all }),
+  }));
+}

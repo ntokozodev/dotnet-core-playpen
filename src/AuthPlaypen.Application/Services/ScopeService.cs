@@ -154,6 +154,11 @@ public class ScopeService(
             return (false, null, true);
         }
 
+        if (scope.ApplicationScopes.Count > 0)
+        {
+            dbContext.ApplicationScopes.RemoveRange(scope.ApplicationScopes);
+        }
+
         dbContext.Scopes.Remove(scope);
         await dbContext.SaveChangesAsync(cancellationToken);
         await openIddictScopeSyncService.HandleScopeDeletionAsync(id, cancellationToken);

@@ -1,17 +1,20 @@
-import { useParams } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
 import { createEffect, createSignal } from "solid-js";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { DeleteConfirmationModal } from "@/components/DeleteConfirmationModal";
 import { MultiSelect } from "@/components/MultiSelect";
-import { useApplications, useUpdateApplication } from "@/queries/applicationQueries";
+import { useApplications, useDeleteApplication, useUpdateApplication } from "@/queries/applicationQueries";
 import { useScopes } from "@/queries/scopeQueries";
 import type { ApplicationFlow } from "@/types/models";
 import { mapSelectionToIds } from "@/utils/selection";
 
 export function EditApplication() {
   const params = useParams();
+  const navigate = useNavigate();
   const apps = useApplications();
   const scopes = useScopes();
   const update = useUpdateApplication();
+  const remove = useDeleteApplication();
 
   const [displayName, setDisplayName] = createSignal("");
   const [clientId, setClientId] = createSignal("");
@@ -20,6 +23,7 @@ export function EditApplication() {
   const [postLogoutRedirectUris, setPostLogoutRedirectUris] = createSignal("");
   const [redirectUris, setRedirectUris] = createSignal("");
   const [selectedScopeIds, setSelectedScopeIds] = createSignal<string[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = createSignal(false);
 
   const selectedApp = () => apps.data?.find((a) => a.id === params.id);
 
@@ -97,6 +101,24 @@ export function EditApplication() {
       >
         Save
       </button>
+      <button class="rounded bg-red-700 px-3 py-2 text-white" type="button" onClick={() => setShowDeleteModal(true)}>
+        Delete Application
+      </button>
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal()}
+        title="Delete application"
+        description="This will permanently remove the application and all linked scope assignments."
+        isDeleting={remove.isPending}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          const app = selectedApp();
+          if (!app) return;
+          remove.mutate(app.id, {
+            onSuccess: () => navigate("/applications"),
+          });
+          setShowDeleteModal(false);
+        }}
+      />
     </div>
   );
 }
