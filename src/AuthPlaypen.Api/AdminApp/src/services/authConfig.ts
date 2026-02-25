@@ -1,4 +1,6 @@
-export const isOidcAuthEnabled = import.meta.env.VITE_ENABLE_OIDC_AUTH === "true";
+import { getBooleanConfigValue, getConfigValue } from "./runtimeConfig";
+
+export const isOidcAuthEnabled = getBooleanConfigValue("VITE_ENABLE_OIDC_AUTH");
 
 export type OidcConfig = {
   authority: string;
@@ -16,8 +18,8 @@ function normalizePath(path: string, fallback: string): string {
 }
 
 export function getOidcConfig(): OidcConfig {
-  const authority = import.meta.env.VITE_API_OIDC_AUTHORITY?.trim() || window.location.origin;
-  const clientId = import.meta.env.VITE_API_OIDC_CLIENT_ID?.trim();
+  const authority = getConfigValue("VITE_API_OIDC_AUTHORITY") || window.location.origin;
+  const clientId = getConfigValue("VITE_API_OIDC_CLIENT_ID");
 
   if (!clientId) {
     throw new Error(
@@ -25,8 +27,8 @@ export function getOidcConfig(): OidcConfig {
     );
   }
 
-  const redirectPath = normalizePath(import.meta.env.VITE_OIDC_REDIRECT_PATH, "/admin/auth/callback");
-  const postLogoutRedirectPath = normalizePath(import.meta.env.VITE_OIDC_POST_LOGOUT_REDIRECT_PATH, "/admin");
+  const redirectPath = normalizePath(getConfigValue("VITE_OIDC_REDIRECT_PATH"), "/admin/auth/callback");
+  const postLogoutRedirectPath = normalizePath(getConfigValue("VITE_OIDC_POST_LOGOUT_REDIRECT_PATH"), "/admin");
 
   return {
     authority,

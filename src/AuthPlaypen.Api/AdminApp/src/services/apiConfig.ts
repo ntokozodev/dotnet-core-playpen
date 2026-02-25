@@ -1,3 +1,5 @@
+import { getBooleanConfigValue } from "./runtimeConfig";
+
 export const apiConfig = {
-  useMockData: import.meta.env.VITE_USE_MOCK_DATA === "true",
+  useMockData: getBooleanConfigValue("VITE_USE_MOCK_DATA"),
 };

@@ -59,15 +59,83 @@ The admin frontend includes an `oidc-client-ts` based auth flow that is intentio
 - Frontend OIDC user state is stored in `sessionStorage` (not `localStorage`).
 - The admin app should point to **API/OpenIddict authority only** and should not target Azure directly.
 
-Environment variables for `src/AuthPlaypen.Api/AdminApp`:
+Runtime configuration for `src/AuthPlaypen.Api/AdminApp` is **100% API-served** (no Vite `.env` fallback in frontend).
+
+## Environment strategy for QA/Staging/Live (API-served runtime config)
+
+Vite env vars are build-time and frozen in the bundle, so the admin app now loads config only from `GET /app-config` at startup.
+
+### How it works
+
+- Admin frontend boots and calls `GET /app-config`.
+- API returns runtime settings from `IConfiguration`.
+- Frontend maps those values into runtime config and then starts the app.
+
+Server shape (implemented in `Program.cs`):
+
+```csharp
+app.MapGet("/app-config", (IConfiguration config, IWebHostEnvironment environment) =>
+{
+    var useMockData = config["AdminApp:UseMockData"];
+    var enableOidcAuth = config["AdminApp:Oidc:EnableAuth"];
+    var authority = config["AdminApp:Oidc:Authority"];
+    var clientId = config["AdminApp:Oidc:ClientId"];
+    var redirectPath = config["AdminApp:Oidc:RedirectPath"];
+    var postLogoutRedirectPath = config["AdminApp:Oidc:PostLogoutRedirectPath"];
+
+    var useLocalMockDefaults = environment.IsDevelopment() && string.Equals(useMockData, "true", StringComparison.OrdinalIgnoreCase);
+
+    if (useLocalMockDefaults)
+    {
+        authority = "https://localhost:5100";
+        clientId = "gatekeeper-web-admin";
+        redirectPath = "/auth/callback";
+        postLogoutRedirectPath = "/";
+    }
+
+    return Results.Ok(new
+    {
+        useMockData,
+        enableOidcAuth,
+        authority,
+        clientId,
+        redirectPath,
+        postLogoutRedirectPath
+    });
+});
+```
+
+### Configure staging/live on Linux server
+
+Set environment variables for the API process (systemd/container/app service), for example:
 
 ```bash
-VITE_ENABLE_OIDC_AUTH=false
-VITE_API_OIDC_AUTHORITY=https://api-host-or-openiddict-host
-VITE_API_OIDC_CLIENT_ID=admin-client-id
-VITE_OIDC_REDIRECT_PATH=/admin/auth/callback
-VITE_OIDC_POST_LOGOUT_REDIRECT_PATH=/admin
+AdminApp__UseMockData=false
+AdminApp__Oidc__EnableAuth=true
+AdminApp__Oidc__Authority=https://login.qa.example.com
+AdminApp__Oidc__ClientId=gatekeeper-web-admin
+AdminApp__Oidc__RedirectPath=/auth/callback
+AdminApp__Oidc__PostLogoutRedirectPath=/
 ```
+
+### Local mock mode (development only)
+
+Local defaults are now defined in `src/AuthPlaypen.Api/appsettings.Development.json` under `AdminApp`:
+
+```json
+"AdminApp": {
+  "UseMockData": "true",
+  "Oidc": {
+    "EnableAuth": "false",
+    "Authority": "https://localhost:5100",
+    "ClientId": "gatekeeper-web-admin",
+    "RedirectPath": "/auth/callback",
+    "PostLogoutRedirectPath": "/"
+  }
+}
+```
+
+The `/app-config` endpoint reads these values in Development, so local mock mode works without extra env setup.
 
 
 ## API contracts

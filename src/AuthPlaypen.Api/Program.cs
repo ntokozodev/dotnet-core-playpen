@@ -132,6 +132,37 @@ if (authConfigured)
 
 app.UseAuthorization();
 
+
+app.MapGet("/app-config", (IConfiguration config, IWebHostEnvironment environment) =>
+{
+    var useMockData = config["AdminApp:UseMockData"];
+    var enableOidcAuth = config["AdminApp:Oidc:EnableAuth"];
+    var authority = config["AdminApp:Oidc:Authority"];
+    var clientId = config["AdminApp:Oidc:ClientId"];
+    var redirectPath = config["AdminApp:Oidc:RedirectPath"];
+    var postLogoutRedirectPath = config["AdminApp:Oidc:PostLogoutRedirectPath"];
+
+    var useLocalMockDefaults = environment.IsDevelopment() && string.Equals(useMockData, "true", StringComparison.OrdinalIgnoreCase);
+
+    if (useLocalMockDefaults)
+    {
+        authority = "https://localhost:5100";
+        clientId = "gatekeeper-web-admin";
+        redirectPath = "/auth/callback";
+        postLogoutRedirectPath = "/";
+    }
+
+    return Results.Ok(new
+    {
+        useMockData,
+        enableOidcAuth,
+        authority,
+        clientId,
+        redirectPath,
+        postLogoutRedirectPath
+    });
+});
+
 app.MapFallbackToFile("/admin/{*path:nonfile}", "admin/index.html");
 app.MapControllers();
 
