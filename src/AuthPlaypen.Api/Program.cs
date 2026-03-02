@@ -251,8 +251,8 @@ app.MapGet("/app-config", (IConfiguration config, IWebHostEnvironment environmen
     {
         authority = "https://localhost:5100";
         clientId = "gatekeeper-web-admin";
-        redirectPath = "/auth/callback";
-        postLogoutRedirectPath = "/";
+        redirectPath = "/admin/auth/callback";
+        postLogoutRedirectPath = "/admin/auth/logout-callback";
     }
 
     return Results.Ok(new

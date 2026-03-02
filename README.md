@@ -90,8 +90,8 @@ app.MapGet("/app-config", (IConfiguration config, IWebHostEnvironment environmen
     {
         authority = "https://localhost:5100";
         clientId = "gatekeeper-web-admin";
-        redirectPath = "/auth/callback";
-        postLogoutRedirectPath = "/";
+        redirectPath = "/admin/auth/callback";
+        postLogoutRedirectPath = "/admin/auth/logout-callback";
     }
 
     return Results.Ok(new
@@ -115,8 +115,8 @@ AdminApp__UseMockData=false
 AdminApp__Oidc__EnableAuth=true
 AdminApp__Oidc__Authority=https://login.qa.example.com
 AdminApp__Oidc__ClientId=gatekeeper-web-admin
-AdminApp__Oidc__RedirectPath=/auth/callback
-AdminApp__Oidc__PostLogoutRedirectPath=/
+AdminApp__Oidc__RedirectPath=/admin/auth/callback
+AdminApp__Oidc__PostLogoutRedirectPath=/admin/auth/logout-callback
 ```
 
 Use API environment variables (`AdminApp__...`) for QA/Staging/Live instead of frontend `VITE_...` values. `VITE_*` variables are build-time and become fixed in the bundled assets, while `/app-config` keeps config runtime-driven per environment.
@@ -132,8 +132,8 @@ Local defaults are now defined in `src/AuthPlaypen.Api/appsettings.Development.j
     "EnableAuth": "false",
     "Authority": "https://localhost:5100",
     "ClientId": "gatekeeper-web-admin",
-    "RedirectPath": "/auth/callback",
-    "PostLogoutRedirectPath": "/"
+    "RedirectPath": "/admin/auth/callback",
+    "PostLogoutRedirectPath": "/admin/auth/logout-callback"
   }
 }
 ```
