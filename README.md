@@ -55,6 +55,7 @@ The admin frontend includes an `oidc-client-ts` based auth flow that is intentio
 - Set `VITE_ENABLE_OIDC_AUTH=true` to require authentication for admin routes.
 - Callback route is `/admin/auth/callback`.
 - Unauthenticated users are redirected to API/OpenIddict with PKCE (`response_type=code`).
+- OpenIddict server exposes both `/connect/authorize` and `/connect/token` for authorization code + PKCE flow.
 - OIDC scope is intentionally fixed in frontend (`openid profile`) and treated as API/OpenIddict contract, not a per-frontend env setting.
 - Frontend OIDC user state is stored in `sessionStorage` (not `localStorage`).
 - The admin app should point to **API/OpenIddict authority only** and should not target Azure directly.
